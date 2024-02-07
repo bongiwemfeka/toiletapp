@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:geolocator/geolocator.dart';
@@ -221,15 +223,12 @@ class ProfileTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Add your profile tab content here
-    return const Center(
-      child: Text(
-        'Profile',
-        style: TextStyle(
-          color: Colors.green,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
+    return Center(
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.of(context).pushNamed('/userProfile');
+        },
+        child: const Text('Go to Profile'),
       ),
     );
   }

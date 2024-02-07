@@ -4,6 +4,7 @@ import 'login_screen.dart';
 import 'welcome_screen.dart';
 //import 'package:preview/preview.dart';
 import 'scan_qr_screen.dart';
+import 'user_profile_screen.dart';
 
 void main() => runApp(const MyApp());
 
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/welcome': (context) => WelcomeScreen(),
         '/scanQR': (context) => const ScanQRScreen(),
+        '/userProfile': (context) => const UserProfileScreen(),
       },
     );
   }
