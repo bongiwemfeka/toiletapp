@@ -1,5 +1,7 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
-import 'welcome_screen.dart';
+import 'scan_qr_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -7,89 +9,65 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: Colors.white, // Set white background color
       appBar: AppBar(
-        title: const Text('Login'),
-        backgroundColor: Colors.green,
+        title: Text('Login'),
+        backgroundColor: Colors.white,
       ),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: EdgeInsets.all(20.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo
+              children: <Widget>[
+                // Add this for local image asset
                 Image.asset(
-                  'assets/welcome.png', // Replace with your logo image path
-                  width: 200,
-                  height: 150,
+                  'assets/welcome.png', // Specify your image's asset path
+                  width: 200, // Set width, adjust according to your needs
+                  height: 200, // Set height, adjust according to your needs
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
-                // Username TextField
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(0, 0, 0, 0).withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const TextField(
-                    style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-                    decoration: InputDecoration(
-                      hintText: 'Username',
-                      hintStyle:
-                          TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-                      border: InputBorder.none,
-                    ),
+                // Email field
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
-                // Password TextField
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color:
-                        const Color.fromARGB(255, 38, 155, 77).withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const TextField(
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Password',
-                      hintStyle:
-                          TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-                      border: InputBorder.none,
-                    ),
-                    obscureText: true,
+                // Password field
+                TextFormField(
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
-                // Login Button
+                // Login button with green color
                 ElevatedButton(
                   onPressed: () {
-                    // Implement login logic
+                    // Replace this with your actual login logic
+                    // After successful login:
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => WelcomeScreen(),
+                        builder: (context) => const ScanQRScreen(),
                       ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    primary: Colors.green, // Set green button color
                   ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(fontSize: 18),
-                  ),
+                  child: Text('Login'),
                 ),
               ],
             ),

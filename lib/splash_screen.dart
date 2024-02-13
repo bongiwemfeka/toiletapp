@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'login_screen.dart';
+//import 'login_screen.dart';
+import 'welcome_screen.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -9,8 +10,8 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Timer(
       const Duration(seconds: 2),
-      () => Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => const LoginScreen())),
+      () => Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => WelcomeScreen())),
     );
 
     return const Scaffold(
