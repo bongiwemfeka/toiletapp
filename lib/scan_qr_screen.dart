@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -83,7 +84,6 @@ class ScanTab extends StatefulWidget {
 class _ScanTabState extends State<ScanTab> {
   String scannedCode = '';
   String gpsLocation = '';
-  String toiletInfo = '';
 
   Future<void> _scanQR() async {
     try {
@@ -94,7 +94,6 @@ class _ScanTabState extends State<ScanTab> {
         scannedCode = result.rawContent;
         gpsLocation =
             'Latitude: ${position.latitude}, Longitude: ${position.longitude}';
-        toiletInfo = "Toilet ID: $scannedCode - Status: Clean";
       });
     } catch (e) {
       if (kDebugMode) {
@@ -124,6 +123,37 @@ class _ScanTabState extends State<ScanTab> {
     );
   }
 
+  Future<void> saveToiletStatus(String toiletId, String status,
+      DateTime scanDateTime, double latitude, double longitude) async {
+    const apiUrl = 'https://www.rdrf.co.za/save_toilet_status.php';
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        body: {
+          'toilet_id': toiletId,
+          'status': status,
+          'scan_date': scanDateTime.toLocal().toString().split(' ')[0],
+          'scan_time': scanDateTime.toLocal().toString().split(' ')[1],
+          'latitude': latitude.toString(),
+          'longitude': longitude.toString(),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // ignore: avoid_print
+        print(
+            'Toilet status saved successfully. Status code: ${response.statusCode}');
+      } else {
+        // ignore: avoid_print
+        print('Failed to save toilet status');
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error saving toilet status: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -135,27 +165,31 @@ class _ScanTabState extends State<ScanTab> {
           children: [
             Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(8.0),
               ),
               elevation: 4,
               child: InkWell(
                 onTap: _scanQR,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                child: Container(
+                  width:
+                      MediaQuery.of(context).size.width * 0.6, // Adjust width
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 20.0, horizontal: 20.0), // Adjust padding
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.qr_code_scanner,
-                          size: 80.0, color: Colors.green),
-                      SizedBox(height: 10),
+                          size: 30.0, color: Colors.green),
+                      SizedBox(height: 8),
                       Text('Scan QR Code',
-                          style: TextStyle(color: Colors.black, fontSize: 20)),
+                          style: TextStyle(color: Colors.black, fontSize: 18)),
                     ],
                   ),
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 12),
             if (scannedCode.isNotEmpty && gpsLocation.isNotEmpty) ...[
               Text(
                 'Scanned Toilet ID: $scannedCode',
@@ -167,7 +201,7 @@ class _ScanTabState extends State<ScanTab> {
                 style: TextStyle(fontSize: 16, color: Colors.black54),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 12),
             ],
             ElevatedButton(
               onPressed: scannedCode.isNotEmpty && gpsLocation.isNotEmpty
@@ -175,7 +209,7 @@ class _ScanTabState extends State<ScanTab> {
                   : null,
               style: ElevatedButton.styleFrom(
                 primary: Colors.green,
-                onPrimary: Colors.black,
+                onPrimary: Colors.white,
               ),
               child: const Text('Confirm Job'),
             ),
@@ -191,7 +225,7 @@ class NotificationsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Padding(
         padding: EdgeInsets.all(16.0),
         child: Text(
@@ -209,7 +243,7 @@ class ProfileTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Padding(
         padding: EdgeInsets.all(16.0),
         child: Text(
