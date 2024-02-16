@@ -20,7 +20,7 @@ class WelcomeScreen extends StatelessWidget {
             ),
             SizedBox(height: 50.0),
             Text(
-              'Welcome to MyApp',
+              'Sign Up',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,

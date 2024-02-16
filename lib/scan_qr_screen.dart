@@ -1,51 +1,34 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Scan QR Code',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const ScanQRScreen(),
-    );
-  }
-}
+void main() => runApp(MaterialApp(home: ScanQRScreen()));
 
 class ScanQRScreen extends StatefulWidget {
-  const ScanQRScreen({super.key});
+  const ScanQRScreen({Key? key}) : super(key: key);
 
   @override
-  State<ScanQRScreen> createState() => _ScanQRScreenState();
+  _ScanQRScreenState createState() => _ScanQRScreenState();
 }
 
 class _ScanQRScreenState extends State<ScanQRScreen> {
-  int _currentIndex = 0;
+  int _currentIndex = 0; // Index for the selected tab
 
   final List<Widget> _tabs = [
-    const ScanTab(),
-    const NotificationsTab(),
-    const ProfileTab(),
+    ScanTab(),
+    NotificationsTab(),
+    ProfileTab(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scan QR Code'),
+        title: Text('Scan Toilet'),
+        backgroundColor: Colors.green,
       ),
       body: _tabs[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -55,7 +38,7 @@ class _ScanQRScreenState extends State<ScanQRScreen> {
             _currentIndex = index;
           });
         },
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.qr_code_scanner),
             label: 'Scan',
@@ -75,52 +58,46 @@ class _ScanQRScreenState extends State<ScanQRScreen> {
 }
 
 class ScanTab extends StatefulWidget {
-  const ScanTab({super.key});
+  const ScanTab({Key? key}) : super(key: key);
 
   @override
-  State<ScanTab> createState() => _ScanTabState();
+  _ScanTabState createState() => _ScanTabState();
 }
 
 class _ScanTabState extends State<ScanTab> {
   String scannedCode = '';
   String gpsLocation = '';
+  String toiletLocation = ''; // Variable to hold the extracted toilet location
 
   Future<void> _scanQR() async {
     try {
-      final ScanResult result = await BarcodeScanner.scan();
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      setState(() {
-        scannedCode = result.rawContent;
-        gpsLocation =
-            'Latitude: ${position.latitude}, Longitude: ${position.longitude}';
-      });
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error scanning QR code: $e');
+      final result = await BarcodeScanner.scan();
+      if (result.rawContent.isNotEmpty) {
+        setState(() {
+          scannedCode = result.rawContent;
+
+          toiletLocation = result
+              .rawContent; // Variable to hold the extracted toilet location
+        });
+        await _getGPSLocation(); // Fetch the GPS location after scanning
       }
+    } catch (e) {
+      print('Error scanning QR code: $e');
     }
   }
 
-  void _confirmJob() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Job Confirmation"),
-          content: Text(
-              "Toilet ID: $scannedCode has been confirmed.\nLocation: $gpsLocation"),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+  Future<void> _getGPSLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      setState(() {
+        gpsLocation =
+            'Latitude: ${position.latitude}, Longitude: ${position.longitude}';
+      });
+      // Consider saving the toilet status or showing the confirmation dialog here if needed
+    } catch (e) {
+      print('Error getting GPS location: $e');
+    }
   }
 
   Future<void> saveToiletStatus(String toiletId, String status,
@@ -154,66 +131,85 @@ class _ScanTabState extends State<ScanTab> {
     }
   }
 
+  void _showConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirmation"),
+          content:
+              Text("Toilet Name: $scannedCode\nGPS Location: $gpsLocation"),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    double cardWidth =
+        MediaQuery.of(context).size.width * 0.4; // 40% of screen width
+    double cardHeight =
+        MediaQuery.of(context).size.height * 0.2; // 20% of screen height
+
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              elevation: 4,
-              child: InkWell(
-                onTap: _scanQR,
-                child: Container(
-                  width:
-                      MediaQuery.of(context).size.width * 0.6, // Adjust width
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 20.0, horizontal: 20.0), // Adjust padding
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.qr_code_scanner,
-                          size: 30.0, color: Colors.green),
-                      SizedBox(height: 8),
-                      Text('Scan QR Code',
-                          style: TextStyle(color: Colors.black, fontSize: 18)),
-                    ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  side: BorderSide(color: Colors.green, width: 2.0),
+                ),
+                child: InkWell(
+                  onTap: _scanQR,
+                  child: Container(
+                    width: cardWidth,
+                    height: cardHeight,
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.qr_code_scanner,
+                            size: 60.0, color: Colors.green),
+                        SizedBox(
+                            height:
+                                8), // Add some space between the icon and text
+                        Text('Scan QR Code', style: TextStyle(fontSize: 18)),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: 12),
-            if (scannedCode.isNotEmpty && gpsLocation.isNotEmpty) ...[
-              Text(
-                'Scanned Toilet ID: $scannedCode',
-                style: TextStyle(fontSize: 18, color: Colors.black54),
-                textAlign: TextAlign.center,
+              SizedBox(height: 20),
+              if (scannedCode.isNotEmpty)
+                Text('Toilet Name: $scannedCode',
+                    style: TextStyle(fontSize: 16)),
+              if (toiletLocation.isNotEmpty)
+                //Text('GPS Location: $gpsLocation',
+                // style: TextStyle(fontSize: 16)),
+                Text('Location: $toiletLocation',
+                    style: TextStyle(fontSize: 16)),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: scannedCode.isNotEmpty && toiletLocation.isNotEmpty
+                    ? _showConfirmationDialog
+                    : null, // Button is enabled only if both QR code is scanned and location is fetched
+                style: ElevatedButton.styleFrom(primary: Colors.green),
+                child: Text('Confirm Job'),
               ),
-              Text(
-                'GPS Location: $gpsLocation',
-                style: TextStyle(fontSize: 16, color: Colors.black54),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 12),
             ],
-            ElevatedButton(
-              onPressed: scannedCode.isNotEmpty && gpsLocation.isNotEmpty
-                  ? _confirmJob
-                  : null,
-              style: ElevatedButton.styleFrom(
-                primary: Colors.green,
-                onPrimary: Colors.white,
-              ),
-              child: const Text('Confirm Job'),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -221,17 +217,17 @@ class _ScanTabState extends State<ScanTab> {
 }
 
 class NotificationsTab extends StatelessWidget {
-  const NotificationsTab({super.key});
+  const NotificationsTab({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Text(
-          'No new notifications.',
-          style: TextStyle(fontSize: 18, color: Colors.black54),
-          textAlign: TextAlign.center,
+      child: Text(
+        'Notifications.',
+        style: TextStyle(
+          color: Colors.green,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -239,17 +235,17 @@ class NotificationsTab extends StatelessWidget {
 }
 
 class ProfileTab extends StatelessWidget {
-  const ProfileTab({super.key});
+  const ProfileTab({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Text(
-          'Profile information not set.',
-          style: TextStyle(fontSize: 18, color: Colors.black54),
-          textAlign: TextAlign.center,
+      child: Text(
+        'Profile .',
+        style: TextStyle(
+          color: Colors.green,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

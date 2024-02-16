@@ -12,7 +12,7 @@ class LoginScreen extends StatelessWidget {
       backgroundColor: Colors.white, // Set white background color
       appBar: AppBar(
         title: Text('Login'),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.green,
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -60,7 +60,7 @@ class LoginScreen extends StatelessWidget {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const ScanQRScreen(),
+                        builder: (context) => ScanQRScreen(),
                       ),
                     );
                   },
